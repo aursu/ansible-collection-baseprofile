@@ -1,0 +1,89 @@
+---
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Everything here imports by the full ansible_collections.aursu.<name> path, so
+# the checkout sits at ansible_collections/aursu/baseprofile, and aursu.general
+# (whose module_utils/kernels.py the modules import) is installed next to it.
+jobs:
+  unit:
+    name: unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: ansible_collections/aursu/baseprofile
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install the test toolchain
+        run: pip install --disable-pip-version-check ansible-core pytest
+
+      - name: Install aursu.general next to this collection
+        run: ansible-galaxy collection install "aursu.general:==1.8.0" -p "${GITHUB_WORKSPACE}"
+
+      - name: Unit tests
+        working-directory: ansible_collections/aursu/baseprofile
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: python -m pytest tests/unit -q
+
+  lint:
+    name: ansible-lint
+    runs-on: ubuntu-latest
+    # Blocking: load-failure and syntax-check are unskippable, so a file that
+    # cannot be parsed fails the build (the aursu.lvm_setup 1.3.0 lesson).
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: ansible_collections/aursu/baseprofile
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install ansible-lint
+        run: pip install --disable-pip-version-check ansible-lint
+
+      - name: Install aursu.general
+        run: ansible-galaxy collection install "aursu.general:==1.8.0"
+
+      - name: Lint the roles
+        working-directory: ansible_collections/aursu/baseprofile
+        run: ansible-lint roles/
+
+  docs:
+    name: module documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: ansible_collections/aursu/baseprofile
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install ansible-core and aursu.general
+        run: |
+          pip install --disable-pip-version-check ansible-core
+          ansible-galaxy collection install "aursu.general:==1.8.0" -p "${GITHUB_WORKSPACE}"
+
+      # A YAML error in DOCUMENTATION is invisible until ansible-doc parses it,
+      # the same way the Galaxy importer does.
+      - name: ansible-doc renders every module
+        env:
+          ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}
+        run: |
+          set -e
+          for m in kernel_cleanup; do
+            ansible-doc "aursu.baseprofile.${m}" >/dev/null
+            echo "aursu.baseprofile.${m}: OK"
+          done
