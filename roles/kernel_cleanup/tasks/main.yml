@@ -1,0 +1,14 @@
+---
+- name: Remove kernels outside the retention policy
+  aursu.baseprofile.kernel_cleanup:
+    latest_only: "{{ kernel_cleanup_latest_only }}"
+    keep_last: "{{ kernel_cleanup_keep_last }}"
+  register: kernel_cleanup_result
+
+- name: Report the kernels removed
+  ansible.builtin.debug:
+    msg: >-
+      removed {{ kernel_cleanup_result.removed | join(', ') }},
+      kept {{ kernel_cleanup_result.kept | join(', ') }},
+      {{ (kernel_cleanup_result.boot_bytes_freed / 1048576) | round(1) }} MiB freed in /boot
+  when: kernel_cleanup_result.removed | length > 0

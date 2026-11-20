@@ -1,0 +1,5 @@
+---
+# Keep only the newest kernel (and the running one). Wins over keep_last.
+kernel_cleanup_latest_only: false
+# Otherwise keep this many newest kernels (and the running one).
+kernel_cleanup_keep_last: 2

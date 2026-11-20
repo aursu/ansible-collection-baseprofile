@@ -1,0 +1,27 @@
+namespace: aursu
+name: baseprofile
+version: 1.0.0
+readme: README.md
+authors:
+  - Alexander Ursu <alexander.ursu@gmail.com>
+description: >
+  Base host configuration that changes state - the counterpart of the read-only
+  facts collection aursu.general. First content: removal of old kernels by policy.
+license: MIT
+license_file: ''
+tags:
+  - kernel
+  - linux
+  - system
+  - baseprofile
+dependencies:
+  aursu.general: ">=1.8.0"
+repository: https://github.com/aursu/ansible-collection-baseprofile.git
+documentation: https://github.com/aursu/ansible-collection-baseprofile
+homepage: https://github.com/aursu/ansible-collection-baseprofile
+issues: https://github.com/aursu/ansible-collection-baseprofile/issues
+build_ignore:
+  - .pytest_cache
+  - dist
+  - .github
+  - collections
