@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: Alexander Ursu
+  description: Remove old kernels by a retention policy (latest_only / keep_last).
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Ubuntu
+      versions: ["jammy", "noble"]
+    - name: Debian
+      versions: ["bookworm"]
+  galaxy_tags:
+    - kernel
+    - boot
+    - linux
+dependencies: []
